@@ -1,23 +1,40 @@
-import { Router } from 'express'
+import { Elysia } from 'elysia'
 
-import { jwt, endpoint } from '@/middlewares'
+import { createUserService } from './createUser'
+import { getOneUserService } from './getOneUser'
+import { updateUserService } from './updateUser'
+import { deleteUserService } from './removeUser'
 
-import { createUserController } from './createUser/controller'
-import { updateUserController } from './updateUser/controller'
-import { getOneUserController } from './getOneUser/controller'
-import { deleteDomainController } from './removeUser/controller'
+import { authMiddleware } from '@/middlewares/auth'
+import { UserSchema } from '@/models/User'
 
-const router = Router()
+export const userRouter = new Elysia({ prefix: '/users' })
+  .post(
+    '/',
+    async ({ body }) => {
+      const user = await createUserService(body)
 
-router.post('/', endpoint(createUserController))
+      return { message: 'User created successfully', user }
+    },
+    UserSchema
+  )
+  .use(authMiddleware)
+  .get('/:id', async ({ params: { id } }) => {
+    const user = await getOneUserService(id)
 
-// --------------- Protected Routes ---------------
-router.use(jwt)
+    return { message: 'User found successfully', user }
+  })
+  .put(
+    '/:id',
+    async ({ params: { id }, body }) => {
+      const user = await updateUserService(id, body)
 
-router.get('/', endpoint(getOneUserController))
+      return { message: 'User updated successfully', user }
+    },
+    UserSchema
+  )
+  .delete('/:id', async ({ params: { id } }) => {
+    await deleteUserService(id)
 
-router.put('/', endpoint(updateUserController))
-
-router.delete('/', endpoint(deleteDomainController))
-
-export default router
+    return { message: 'User deleted successfully' }
+  })

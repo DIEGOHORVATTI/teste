@@ -1,11 +1,20 @@
-import { createConnection } from 'mongoose'
-
 import { MONGO_URL } from '../config'
 
-export const unipConnect = createConnection(MONGO_URL, {
+import { createConnection } from 'mongoose'
+
+import { version } from '../../package.json'
+
+export const connectDB = createConnection(MONGO_URL, {
+  dbName: process.env.MONGODB_DATABASE,
   maxPoolSize: 10
 })
 
-unipConnect.on('connecting', () => console.log('Connecting to the database'))
-unipConnect.on('error', err => console.error('🔴 Error connecting to the database', err))
-unipConnect.on('disconnected', () => console.log('🔴 Disconnected from the database'))
+connectDB.once('connected', () => {
+  if (process.env.NODE_ENV) console.info(`🌟 ${process.env.NODE_ENV}`)
+
+  if (version) console.info(`🔖 ${version}`)
+})
+
+connectDB.on('error', error => {
+  console.error(`🔥 ${error}`)
+})

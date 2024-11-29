@@ -1,11 +1,14 @@
-import { Router } from 'express'
+import { Elysia, t } from 'elysia'
 
-import { endpoint } from '@/middlewares'
+import { UserSchema } from '@/models/User'
+import { authenticateUserService } from './authenticate-service'
 
-import { authenticateUserController } from './login/controller'
+export const authRouter = new Elysia({ prefix: '/auth' }).post(
+  '/login',
+  async ({ body }) => {
+    const token = await authenticateUserService(body)
 
-const router = Router()
-
-router.post('/login', endpoint(authenticateUserController))
-
-export default router
+    return { token }
+  },
+  UserSchema
+)

@@ -1,15 +1,9 @@
 import { HTTPError } from '@/errors'
 
-import { IUser, User, UserSchema } from '@/models/User'
+import { IUser, User } from '@/models/User'
 
-type UpdatedUser = IUser & {
-  userId: string
-}
-
-export const updateUserService = async (data: UpdatedUser) => {
-  const { email, password } = UserSchema.parse(data)
-
-  const user = await User.findById(data.userId)
+export const updateUserService = async (id: string, { email, password }: IUser) => {
+  const user = await User.findById(id)
 
   if (!user) {
     throw new HTTPError('User not found', 404)
@@ -18,7 +12,7 @@ export const updateUserService = async (data: UpdatedUser) => {
   if (email) {
     const existingUser = await User.findOne({ email })
 
-    const isDifferentUser = existingUser?.id !== data.userId
+    const isDifferentUser = existingUser?.id !== id
     validateEmailUniqueness(isDifferentUser)
 
     user.email = email

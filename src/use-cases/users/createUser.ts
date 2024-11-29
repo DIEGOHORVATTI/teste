@@ -1,10 +1,8 @@
 import { HTTPError } from '@/errors'
 
-import { IUser, User, UserSchema } from '@/models/User'
+import { IUser, User } from '@/models/User'
 
-export const createUserService = async (data: IUser) => {
-  const { email, password } = UserSchema.parse(data)
-
+export const createUserService = async ({ email, password }: IUser) => {
   if (await User.findOne({ email })) {
     throw new HTTPError('User of this email already exists', 409)
   }
