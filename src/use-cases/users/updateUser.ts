@@ -1,19 +1,22 @@
-import { HTTPError } from '@/errors'
-
 import { IUser, User } from '@/models/User'
+
+import { error } from 'elysia'
 
 export const updateUserService = async (id: string, { email, password }: IUser) => {
   const user = await User.findById(id)
 
   if (!user) {
-    throw new HTTPError('User not found', 404)
+    throw error('Not Found', 'User not found')
   }
 
   if (email) {
     const existingUser = await User.findOne({ email })
 
     const isDifferentUser = existingUser?.id !== id
-    validateEmailUniqueness(isDifferentUser)
+
+    if (isDifferentUser) {
+      throw error('Conflict', 'User of this email already exists')
+    }
 
     user.email = email
   }
@@ -22,15 +25,9 @@ export const updateUserService = async (id: string, { email, password }: IUser) 
     user.password = password
   }
 
-  await user.save().catch(() => {
-    throw new HTTPError('Failed to update user', 500)
+  await user?.save().catch(() => {
+    throw error('Internal Server Error', 'Failed to update user')
   })
 
   return user
-}
-
-function validateEmailUniqueness(existingUser: boolean) {
-  if (existingUser) {
-    throw new HTTPError('User with this email already exists', 409)
-  }
 }

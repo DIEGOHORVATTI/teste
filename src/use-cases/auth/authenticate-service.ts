@@ -1,20 +1,19 @@
 import { User, IUser } from '@/models/User'
-import { generateToken } from '@/utils/generateToken'
 
-import { HTTPError } from '@/errors'
+import { error } from 'elysia'
 
 export const authenticateUserService = async ({ email, password }: IUser) => {
   const user = await User.findOne({ email })
 
   if (!user) {
-    throw new HTTPError('Email not registered', 401)
+    error(401, 'Email not registered')
   }
 
-  const passwordMatch = user.comparePassword?.(password)
+  const passwordMatch = user?.comparePassword?.(password)
 
   if (!passwordMatch) {
-    throw new HTTPError('Invalid credentials', 401)
+    error(401, 'Invalid credentials')
   }
 
-  return generateToken(user.id)
+  return user
 }

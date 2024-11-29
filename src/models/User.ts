@@ -1,9 +1,10 @@
-import { Schema } from 'mongoose'
-
-import { connectDB, setDefaultSettingsSchema } from '../shared'
-import { collectionsData } from '../config'
-
 import { t } from 'elysia'
+
+import { Schema } from 'mongoose'
+import { collectionsData } from '@/constants/config'
+
+import { setDefaultSettingsSchema } from '@/shared/set-default-settings-schema'
+import { connectDB } from '@/shared/connection-db'
 
 export type IUser = {
   email: string

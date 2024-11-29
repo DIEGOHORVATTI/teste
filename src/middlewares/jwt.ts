@@ -1,28 +1,32 @@
-import { Elysia } from 'elysia'
-import { HTTPError } from '@/errors/httpError'
+import { Elysia, error, t } from 'elysia'
 
-import { jwtConfig } from '@/shared/jwt-config'
+import { User } from '@/models/User'
+
+import { jwtSettings } from '@/shared/jwt-settings'
+
+const bearerTokenGuard = {
+  headers: t.Object({
+    authorization: t.String({
+      pattern: '^Bearer \\S+$'
+    })
+  })
+}
 
 export const jwt = new Elysia()
-  .use(jwtConfig)
+  .use(jwtSettings)
+  .guard(bearerTokenGuard)
+  .derive(async ({ headers: { authorization }, jwt }) => {
+    const token = authorization.slice('Bearer '.length)
 
-  .derive(async ({ headers, jwt }) => {
-    const auth = headers['authorization']
-
-    const token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null
-
-    if (!token) return { user: null }
-
-    const user = await jwt.verify(token)
-
-    return { user }
-  })
-  .onError(({ error, set }) => {
-    if (error instanceof HTTPError) {
-      set.status = error.status
-      return { error: error.message }
+    const decoded = await jwt.verify(token)
+    if (!decoded) {
+      throw error('Unauthorized', 'Invalid token payload')
     }
 
-    set.status = 500
-    return { error: 'Internal Server Error' }
+    const user = await User.findById(decoded.id).select('-password')
+    if (!user) {
+      throw error('Unauthorized', 'User not found')
+    }
+
+    return { user }
   })

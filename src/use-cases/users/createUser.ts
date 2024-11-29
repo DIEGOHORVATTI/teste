@@ -1,15 +1,21 @@
-import { HTTPError } from '@/errors'
-
 import { IUser, User } from '@/models/User'
+
+import { error } from 'elysia'
 
 export const createUserService = async ({ email, password }: IUser) => {
   if (await User.findOne({ email })) {
-    throw new HTTPError('User of this email already exists', 409)
+    throw error('Conflict', 'User of this email already exists')
   }
+
+  console.log('kapa')
+
+  console.log({ email, password })
 
   const user = new User({ email, password })
 
   await user.save().catch(() => {
-    throw new HTTPError('Failed to create user', 500)
+    throw error('Internal Server Error', 'Failed to create user')
   })
+
+  return user
 }

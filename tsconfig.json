@@ -15,9 +15,8 @@
     "incremental": true,
     "allowJs": true,
     "removeComments": true,
-    "paths": {
-      "@/*": ["*"]
-    }
+    "paths": { "@/*": ["*"] }
   },
-  "include": ["src", "package.json"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
