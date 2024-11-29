@@ -1,9 +1,9 @@
-import { Router } from 'express'
+// buscar nomes de arquivos na pasta use-cases e importar cada um deles como um módulo
 
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-export const router = Router()
+export const router = // elisia
 
 const useCaseModules = readdirSync(join(__dirname, 'use-cases')).filter(f => f !== 'shared')
 

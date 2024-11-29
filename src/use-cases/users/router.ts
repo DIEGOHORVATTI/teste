@@ -5,7 +5,7 @@ import { getOneUserService } from './getOneUser'
 import { updateUserService } from './updateUser'
 import { deleteUserService } from './removeUser'
 
-import { authMiddleware } from '@/middlewares/auth'
+import { jwt } from '@/middlewares/jwt'
 import { UserSchema } from '@/models/User'
 
 export const userRouter = new Elysia({ prefix: '/users' })
@@ -18,7 +18,7 @@ export const userRouter = new Elysia({ prefix: '/users' })
     },
     UserSchema
   )
-  .use(authMiddleware)
+  .use(jwt)
   .get('/:id', async ({ params: { id } }) => {
     const user = await getOneUserService(id)
 
