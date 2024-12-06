@@ -1,16 +1,15 @@
-import { MONGO_URL } from '../constants/config'
+import { MONGO_URL, MONGODB_DATABASE as dbName, NODE_ENV } from '../constants/config'
 
 import { createConnection } from 'mongoose'
 
 import { version } from '../../package.json'
 
-export const connectDB = createConnection(MONGO_URL, {
-  dbName: process.env.MONGODB_DATABASE,
-  maxPoolSize: 10
-})
+export const connectDB = createConnection(MONGO_URL, { dbName, maxPoolSize: 10 })
 
 connectDB.once('connected', () => {
-  if (process.env.NODE_ENV) console.info(`🌟 ${process.env.NODE_ENV}`)
+  console.info('🟢 Database connected')
+
+  if (NODE_ENV) console.info(`🌟 ${NODE_ENV}`)
 
   if (version) console.info(`🔖 ${version}`)
 })

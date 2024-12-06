@@ -1,33 +1,37 @@
 {
-  "name": "bun",
+  "name": "backend",
   "type": "module",
   "version": "0.1.0",
-  "devDependencies": {
-    "@types/node": "^22.10.1",
-    "pre-commit": "^1.2.2"
-  },
-  "peerDependencies": {
-    "typescript": "^5.7.2"
-  },
   "dependencies": {
     "@elysiajs/cors": "^0.8.0",
     "@elysiajs/jwt": "^0.8.0",
     "@elysiajs/swagger": "^0.8.5",
+    "@react-email/components": "^0.0.29",
     "@swc/cli": "^0.1.65",
-    "@swc/core": "^1.9.3",
+    "@swc/core": "^1.10.0",
     "elysia": "^0.8.17",
-    "mongoose": "^8.8.3"
+    "mongoose": "^8.8.3",
+    "nodemailer": "^6.9.16",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^18.3.14",
+    "@types/react-dom": "^18.3.2",
+    "pre-commit": "^1.2.2",
+    "react-email": "^3.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts",
-    "build": "swc src -d dist --source-maps",
+    "start": "bun run dist/index.js",
+    "email": "email dev --dir src/emails",
+    "build": "swc src -d dist",
     "lint:fix": "eslint --fix --ext .ts,.tsx .",
-    "prettier": "prettier --config .prettierrc 'src/**/*.ts' --write",
-    "update-version": "git add . && git push"
-  },
-  "pre-commit": [
-    "build",
-    "update-version"
-  ]
+    "prettier": "prettier --config .prettierrc 'src/**/*.ts' --write"
+  }
 }

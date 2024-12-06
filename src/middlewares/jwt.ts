@@ -6,9 +6,7 @@ import { jwtSettings } from '@/shared/jwt-settings'
 
 const bearerTokenGuard = {
   headers: t.Object({
-    authorization: t.String({
-      pattern: '^Bearer \\S+$'
-    })
+    authorization: t.String({ pattern: '^Bearer \\S+$' })
   })
 }
 
@@ -16,16 +14,20 @@ export const jwt = new Elysia()
   .use(jwtSettings)
   .guard(bearerTokenGuard)
   .derive(async ({ headers: { authorization }, jwt }) => {
-    const token = authorization.slice('Bearer '.length)
-
-    const decoded = await jwt.verify(token)
-    if (!decoded) {
-      throw error('Unauthorized', 'Invalid token payload')
+    if (!authorization) {
+      throw error('Unauthorized', { error: 'Nenhum token fornecido' })
     }
 
-    const user = await User.findById(decoded.id).select('-password')
+    const token = authorization.slice('Bearer '.length)
+    const decoded = await jwt.verify(token)
+
+    if (!decoded) {
+      throw error('Unauthorized', { error: 'Token inválido' })
+    }
+
+    const user = await User.findById(decoded.id)
     if (!user) {
-      throw error('Unauthorized', 'User not found')
+      throw error('Unauthorized', { error: 'Usuário não encontrado' })
     }
 
     return { user }

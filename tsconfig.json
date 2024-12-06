@@ -3,6 +3,7 @@
     "target": "ESNext",
     "module": "CommonJS",
     "outDir": "dist",
+    "jsx": "react",
     "baseUrl": "src",
     "rootDir": "src",
     "strict": true,
