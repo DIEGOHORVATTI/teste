@@ -5,30 +5,17 @@ import { collectionsData } from '@/constants/config'
 
 import { setDefaultSettingsSchema, connectDB } from '@/shared'
 
-export const CompanySchema = {
-  body: Type.Object({
-    name: Type.String(),
-    cnpj: Type.String(),
-    about: Type.Optional(Type.String())
-  })
-}
-
-export type ICompany = typeof CompanySchema.body.static
+export const CompanySchema = Type.Object({
+  name: Type.String(),
+  cnpj: Type.String({ format: 'cnpj', pattern: '^[0-9]{14}$' }),
+  about: Type.Optional(Type.String())
+})
 
 const CompanySchemaModel = new Schema<ICompany>(
   {
-    name: {
-      type: String,
-      required: true
-    },
-    cnpj: {
-      type: String,
-      required: true,
-      unique: true
-    },
-    about: {
-      type: String
-    }
+    name: { type: String, required: true },
+    cnpj: { type: String, required: true, unique: true },
+    about: { type: String }
   },
   {
     timestamps: true,
@@ -37,5 +24,7 @@ const CompanySchemaModel = new Schema<ICompany>(
 )
 
 setDefaultSettingsSchema(CompanySchemaModel)
+
+export type ICompany = typeof CompanySchema.static
 
 export const Company = connectDB.model<ICompany>(collectionsData.Company.name, CompanySchemaModel)

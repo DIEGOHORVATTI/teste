@@ -2,7 +2,7 @@ import { error } from 'elysia'
 
 import { User, IUser } from '@/models/User'
 
-export const signService = async ({ email, password }: Pick<IUser, 'email' | 'password'>) => {
+export const signService = async ({ email, password }: Pick<IUser['userSchema'], 'email' | 'password'>) => {
   const user = await User.findOne({ email })
 
   if (!user) {
@@ -10,7 +10,6 @@ export const signService = async ({ email, password }: Pick<IUser, 'email' | 'pa
   }
 
   const isValidPassword = await user.comparePassword(password)
-
   if (!isValidPassword) {
     throw error('Unauthorized', { error: 'Senha inválida' })
   }

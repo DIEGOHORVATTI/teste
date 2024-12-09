@@ -5,37 +5,53 @@ import { getOneUserUseCase, createUserService, updateUserService, deleteUserServ
 import { UserSchema } from '@/models/User'
 import { jwt } from '@/middlewares/jwt'
 
-const router = new Elysia().group('/users', server =>
-  server
-    .post(
-      '/',
-      async ({ body }) => {
-        const { user } = await createUserService(body)
+const router = new Elysia({ tags: ['users'], prefix: '/users' })
+  .post(
+    '/',
+    async ({ body }) => {
+      const { user } = await createUserService(body)
 
-        return { message: 'Usuário criado com sucesso', user }
-      },
-      UserSchema
-    )
-    .use(jwt)
-    .get('/:id', async ({ params: { id } }) => {
+      return { message: 'Usuário criado com sucesso', user }
+    },
+    {
+      body: UserSchema,
+      detail: { description: 'Cria um usuário' }
+    }
+  )
+  .use(jwt)
+  .get(
+    '/:id',
+    async ({ params: { id } }) => {
       const { user } = await getOneUserUseCase(id)
 
       return { message: 'Usuário encontrado com sucesso', user }
-    })
-    .put(
-      '/:id',
-      async ({ params: { id }, body }) => {
-        const { user } = await updateUserService(id, body)
+    },
+    {
+      detail: { description: 'Busca um usuário' }
+    }
+  )
+  .put(
+    '/:id',
+    async ({ params: { id }, body }) => {
+      const { user } = await updateUserService(id, body)
 
-        return { message: 'Usuário atualizado com sucesso', user }
-      },
-      UserSchema
-    )
-    .delete('/:id', async ({ params: { id } }) => {
+      return { message: 'Usuário atualizado com sucesso', user }
+    },
+    {
+      body: UserSchema,
+      detail: { description: 'Atualiza um usuário' }
+    }
+  )
+  .delete(
+    '/:id',
+    async ({ params: { id } }) => {
       await deleteUserService(id)
 
       return { message: 'Usuário deletado com sucesso' }
-    })
-)
+    },
+    {
+      detail: { description: 'Deleta um usuário' }
+    }
+  )
 
 export default router

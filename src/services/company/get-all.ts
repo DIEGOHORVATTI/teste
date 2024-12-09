@@ -1,12 +1,11 @@
-import { Company } from '@/models/Campany'
 import { error } from 'elysia'
 
-export const getAllCompaniesService = async () => {
-  const companies = await Company.find()
+import { Company } from '@/models/Campany'
 
-  if (!companies.length) {
-    throw error('No Content', { error: 'Nenhuma empresa encontrada' })
-  }
+export const getAllCompaniesService = async () => {
+  const companies = await Company.find().catch(() => {
+    throw error('Internal Server Error', { error: 'Erro ao buscar empresas' })
+  })
 
   return companies
 }

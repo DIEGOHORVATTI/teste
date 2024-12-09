@@ -1,21 +1,28 @@
 import { Elysia } from 'elysia'
-import { cors } from '@elysiajs/cors'
-import { swagger } from '@elysiajs/swagger'
+
+import { openApi } from '@/middlewares/open-api'
+import { rateLimit } from '@/middlewares/rate-limit'
 
 import { PORT } from '@/constants/config'
 
 import { router } from './router'
 
-export const server = new Elysia()
-  .use(cors())
-  .use(swagger())
-  .get('/', () => 'API is running 🚀')
+new Elysia()
+  .use(openApi)
+  .use(rateLimit)
+  .onError(({ code, error }) => {
+    if (code === 'NOT_FOUND') return 'Route not found 😭'
 
-// This is a top-level await, which is only available in Bun
-;(async () => {
-  await router()
+    if (code === 'VALIDATION') {
+      const { summary, ...primaryError } = error.all[0]
 
-  server.listen(PORT, ({ url }) => {
-    console.log(`🦊 Elysia is running at ${url}`)
+      if ('path' in primaryError) return { error: `${primaryError.path.slice('/'.length)}: ${summary}` }
+
+      return { error: summary }
+    }
+
+    return error
   })
-})()
+  .use(router(__dirname)) // Usar o roteador customizado
+  .get('/', () => 'API is running 🚀') // Rota principal
+  .listen(PORT, ({ url }) => console.info(`🦊 Elysia is running at ${url}`))

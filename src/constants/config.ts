@@ -13,6 +13,8 @@ export const collectionsData = {
   }
 }
 
+export { version } from '../../package.json'
+
 export const HOST_API = process.env.HOST_API || ''
 
 export const MONGODB_DATABASE = process.env.MONGODB_DATABASE || ''

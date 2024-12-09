@@ -1,5 +1,4 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-
 import { error } from 'elysia'
 
 import nodemailer from 'nodemailer'
@@ -62,9 +61,8 @@ export const recoverPasswordService = async (email: string) => {
       html
     })
     .catch(err => {
-      throw error('Internal Server Error', {
-        error: 'Falha ao enviar e-mail',
-        details: err.message
-      })
+      console.log(err)
+
+      throw error('Internal Server Error', { error: 'Falha ao enviar e-mail' })
     })
 }

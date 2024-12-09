@@ -1,17 +1,14 @@
+import Elysia from 'elysia'
+
 import { readdirSync } from 'fs'
 import { join } from 'path'
 
-import { server } from '.'
+export const router = async (dirname: string) => {
+  const app = new Elysia({ prefix: '' })
 
-const routesPath = join(__dirname, 'routes')
-const routeFiles = readdirSync(routesPath)
+  const directory = join(dirname, 'routes')
 
-export const router = async () => {
-  for (const file of routeFiles) {
-    if (file.endsWith('.routes.ts')) {
-      const { default: router } = await import(join(routesPath, file))
+  for (const file of readdirSync(directory)) app.use((await import(join(directory, file))).default)
 
-      server.use(router)
-    }
-  }
+  return app
 }
