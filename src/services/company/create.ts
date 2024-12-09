@@ -1,6 +1,6 @@
 import { error } from 'elysia'
-import { Company } from '@/models/Campany'
-import { ICompany } from '@/models/Campany'
+
+import { Company, ICompany } from '@/models/Campany'
 
 export const createCompanyService = async (data: ICompany) => {
   const existingCompany = await Company.findOne({ cnpj: data.cnpj })
@@ -12,10 +12,9 @@ export const createCompanyService = async (data: ICompany) => {
   const company = new Company(data)
 
   await company.save().catch(err => {
-    throw error('Internal Server Error', {
-      error: 'Falha ao criar empresa',
-      details: err.message
-    })
+    console.log(err)
+
+    throw error('Internal Server Error', { error: 'Falha ao criar empresa' })
   })
 
   return { company }

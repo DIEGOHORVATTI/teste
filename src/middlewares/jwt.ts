@@ -4,31 +4,29 @@ import { User } from '@/models/User'
 
 import { jwtSettings } from '@/shared/jwt-settings'
 
-const bearerTokenGuard = {
-  headers: t.Object({
-    authorization: t.String({ pattern: '^Bearer \\S+$' })
+const cookieGuard = {
+  cookie: t.Object({
+    token: t.String()
   })
 }
 
-export const jwt = new Elysia()
-  .use(jwtSettings)
-  .guard(bearerTokenGuard)
-  .derive(async ({ headers: { authorization }, jwt }) => {
-    if (!authorization) {
-      throw error('Unauthorized', { error: 'Nenhum token fornecido' })
-    }
+export const jwt = (app: Elysia) =>
+  app
+    .use(jwtSettings)
+    .guard(cookieGuard)
+    .derive(async ({ cookie: { token }, jwt }) => {
+      if (!token.value) {
+        throw error('Unauthorized', { error: 'Nenhum token encontrado nos cookies' })
+      }
 
-    const token = authorization.slice('Bearer '.length)
-    const decoded = await jwt.verify(token)
+      const decoded = await jwt.verify(token.value)
+      if (!decoded) {
+        throw error('Unauthorized', { error: 'Token inválido' })
+      }
 
-    if (!decoded) {
-      throw error('Unauthorized', { error: 'Token inválido' })
-    }
+      const user = await User.findById(decoded.id).catch(() => {
+        throw error('Unauthorized', { error: 'Usuário não encontrado' })
+      })
 
-    const user = await User.findById(decoded.id)
-    if (!user) {
-      throw error('Unauthorized', { error: 'Usuário não encontrado' })
-    }
-
-    return { user }
-  })
+      return { user, token }
+    })
