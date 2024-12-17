@@ -1,4 +1,4 @@
-import { Elysia, t as Type } from 'elysia'
+import { Elysia, t, t as Type } from 'elysia'
 
 import { UserCredentialsSchema } from '@/models/User'
 
@@ -39,6 +39,12 @@ const router = new Elysia({ tags: ['auth'], prefix: '/auth' })
     }
   )
   .use(jwt)
+  .get(
+    '/me',
+    async ({ user }) => user,
+
+    { detail: { description: 'Retorna os dados do usuário logado' } }
+  )
   .get(
     '/logout',
     async ({ token }) => {

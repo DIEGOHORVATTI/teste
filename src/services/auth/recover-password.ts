@@ -33,7 +33,7 @@ export const recoverPasswordService = async (email: string) => {
     attempts: 0
   })
 
-  await user.save().catch(err => {
+  await user.save().catch<{ message: string }>(err => {
     throw error('Internal Server Error', {
       error: 'Erro ao salvar informações do código de recuperação',
       details: err.message

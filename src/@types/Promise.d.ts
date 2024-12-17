@@ -4,7 +4,7 @@ interface Promise<T> {
    * @param onrejected The callback to execute when the Promise is rejected.
    * @returns A Promise for the completion of the callback.
    */
-  catch<TResult = never, TReason = unknown>(
-    onrejected?: ((reason: TReason) => TResult | PromiseLike<TResult>) | undefined | null
+  catch<TResult = never>(
+    onrejected?: ((reason: TResult) => TResult | PromiseLike<TResult>) | undefined | null
   ): Promise<T | TResult>
 }

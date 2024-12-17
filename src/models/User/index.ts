@@ -4,15 +4,27 @@ import { collectionsData } from '@/constants/config'
 
 import { setDefaultSettingsSchema, connectDB } from '@/shared'
 
+import { planType, role, typeRoleDependent, userStatusEnum } from './validation'
+
 import type { IUser, UserCompositeModel, UserExtraInfo } from './types'
 
 export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeModel>, UserExtraInfo>(
   {
+    role: { type: String, enum: role, required: true },
     name: { type: String, required: true },
-    surname: { type: String, required: true },
+    status: { type: String, enum: userStatusEnum, default: 'active', required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    cpf: { type: Number, required: true, unique: true },
+    document: {
+      type: { type: String, required: true },
+      value: { type: String, required: true },
+      cnh: { type: String },
+      rg: { type: String }
+    },
+    responsible: {
+      name: { type: String },
+      cpf: { type: String }
+    },
     birthDate: { type: String, required: true },
     isMinor: { type: Boolean, default: false },
     contract: {
@@ -22,7 +34,7 @@ export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeMod
     motherName: { type: String, required: true },
     phone: { type: String, required: true },
     isArchived: { type: Boolean, default: false },
-    planType: { type: String, required: true },
+    planType: { type: String, enum: planType, required: true },
     responsibleForSale: { type: String, required: true },
     company: [
       {
@@ -37,9 +49,14 @@ export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeMod
       attempts: { type: Number, default: 0 }
     },
     attachments: {
-      contract: { type: String, required: true },
+      contract: { type: [String], required: true },
       document: { type: [String], required: true },
-      paymentProof: { type: String, required: true }
+      paymentProof: { type: [String], required: true }
+    },
+    dependents: {
+      role: { type: String, enum: typeRoleDependent },
+      quantity: { type: Number },
+      dependentsList: { type: [String] }
     }
   },
   {
@@ -47,8 +64,10 @@ export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeMod
     collection: collectionsData.User.collection
   }
 )
+
 setDefaultSettingsSchema(SchemaModel)
 
+// Métodos para verificar se é menor de idade e comparação de senha
 SchemaModel.methods.checkMinor = function (this: IUser['userDocument']) {
   const birthDate = new Date(this.birthDate)
   const age = new Date().getFullYear() - birthDate.getFullYear()
@@ -77,8 +96,9 @@ SchemaModel.pre('save', async function (next) {
 })
 
 SchemaModel.methods.toJSON = function () {
-  const user = this.toObject()
+  const user = this.toObject() as Partial<IUser['userSchema']>
   delete user.password
+  delete user.resetPassword
 
   return user
 }

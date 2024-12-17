@@ -13,6 +13,27 @@ export const collectionsData = {
   }
 }
 
+const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org'
+const COUNTRIES_BASE_URL = 'https://countriesnow.space/api/v0.1'
+
+const apiIntegrations = {
+  nominatim: NOMINATIM_BASE_URL,
+  countries: COUNTRIES_BASE_URL
+}
+
+export const endpoints = {
+  nominatim: {
+    search: `${apiIntegrations.nominatim}/search`,
+    reverse: `${apiIntegrations.nominatim}/reverse`
+  },
+  countries: {
+    all: `${apiIntegrations.countries}/countries`,
+    states: `${apiIntegrations.countries}/countries/states`,
+    cities: `${apiIntegrations.countries}/countries/state/cities`,
+    iso: `${apiIntegrations.countries}/countries/iso`
+  }
+}
+
 export { version } from '../../package.json'
 
 export const HOST_API = process.env.HOST_API || ''

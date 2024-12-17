@@ -3,7 +3,7 @@ import { Elysia } from 'elysia'
 import { openApi } from '@/middlewares/open-api'
 import { rateLimit } from '@/middlewares/rate-limit'
 
-import { PORT } from '@/constants/config'
+import { PORT, version } from '@/constants/config'
 
 import { router } from './router'
 
@@ -24,5 +24,5 @@ new Elysia()
     return error
   })
   .use(router(__dirname)) // Usar o roteador customizado
-  .get('/', () => 'API is running 🚀') // Rota principal
+  .get('/', () => `API is running 🚀: v${version}`) // Rota principal
   .listen(PORT, ({ url }) => console.info(`🦊 Elysia is running at ${url}`))

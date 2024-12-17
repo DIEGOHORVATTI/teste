@@ -18,7 +18,7 @@ export const jwt = (app: Elysia) =>
         throw error('Unauthorized', { error: 'Token inválido' })
       }
 
-      const user = await User.findById(decoded.id)
+      const user = (await User.findById(decoded.id))?.toJSON()
       if (!user) {
         throw error('Unauthorized', { error: 'Usuário não encontrado', reLogin: true })
       }

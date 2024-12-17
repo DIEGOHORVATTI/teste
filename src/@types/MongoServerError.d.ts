@@ -21,5 +21,5 @@ declare global {
      **/
     constructor(message: ErrorDescription)
     get name(): string
-  } & T
+  } & Partial<T>
 }

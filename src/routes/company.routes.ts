@@ -20,18 +20,35 @@ const router = new Elysia({ tags: ['companies'], prefix: '/companies' })
 
       return { message: 'Empresa criada com sucesso', company }
     },
-    { body: CompanySchema }
+    {
+      body: CompanySchema,
+      detail: { description: 'Cria uma empresa' }
+    }
   )
-  .get('/', async () => {
-    const companies = await getAllCompaniesService()
+  .get(
+    '/',
+    async () => {
+      const companies = await getAllCompaniesService()
 
-    return { message: 'Empresas encontradas com sucesso', companies }
-  })
-  .get('/:id', async ({ params: { id } }) => {
-    const company = await getOneCompanyService(id)
+      return {
+        companies,
+        message: 'Empresas encontradas com sucesso'
+      }
+    },
+    { detail: { description: 'Retorna todas as empresas' } }
+  )
+  .get(
+    '/:id',
+    async ({ params: { id } }) => {
+      const company = await getOneCompanyService(id)
 
-    return { message: 'Empresa encontrada com sucesso', company }
-  })
+      return {
+        company,
+        message: 'Empresa encontrada com sucesso'
+      }
+    },
+    { detail: { description: 'Busca uma empresa' } }
+  )
   .put(
     '/:id',
     async ({ params: { id }, body }) => {
@@ -39,12 +56,22 @@ const router = new Elysia({ tags: ['companies'], prefix: '/companies' })
 
       return { message: 'Empresa atualizada com sucesso', company }
     },
-    { body: CompanySchema }
+    {
+      body: CompanySchema,
+      detail: { description: 'Atualiza uma empresa' }
+    }
   )
-  .delete('/:id', async ({ params: { id } }) => {
-    await deleteCompanyService(id)
+  .delete(
+    '/:id',
+    async ({ params: { id } }) => {
+      await deleteCompanyService(id)
 
-    return { message: 'Empresa removida com sucesso' }
-  })
+      return { message: 'Empresa removida com sucesso' }
+    },
+    {
+      type: 'text/plain',
+      detail: { description: 'Remove uma empresa' }
+    }
+  )
 
 export default router
