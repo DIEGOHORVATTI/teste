@@ -56,3 +56,9 @@ export const MAIL_HOST = process.env.MAIL_HOST || ''
 export const MAIL_PORT = process.env.MAIL_PORT || 0
 export const MAIL_USERNAME = process.env.MAIL_USERNAME || ''
 export const MAIL_PASSWORD = process.env.MAIL_PASSWORD || ''
+
+// AWS S3 Configuration
+export const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY || ''
+export const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY || ''
+export const AWS_REGION = process.env.AWS_REGION || ''
+export const S3_BUCKET = process.env.S3_BUCKET || ''

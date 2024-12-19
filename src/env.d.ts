@@ -17,6 +17,12 @@ export declare global {
       MAIL_USERNAME: string
       // number, example: 587
       MAIL_PORT: number
+
+      // AWS S3 Configuration
+      AWS_ACCESS_KEY: string
+      AWS_SECRET_KEY: string
+      AWS_REGION: string
+      S3_BUCKET: string
     }
   }
 }
