@@ -47,7 +47,7 @@ export const userFilter = Type.Object({
   ),
   filters: Type.Optional(
     Type.Object({
-      status: Type.Optional({ ...UserSchema.status, default: 'active' }),
+      status: Type.Optional(Type.String({ enum: ['active', 'inactive', 'analysis'], default: 'active' })),
       document: Type.Optional(UserSchema.document),
       startDate: Type.Optional({ ...registrationDate, default: '2021-01-01' }),
       endDate: Type.Optional({ ...registrationDate, default: '2024-12-31' })
