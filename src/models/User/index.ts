@@ -1,41 +1,42 @@
-import { Model, Schema } from 'mongoose'
+import { Model, Schema, type PaginateModel } from 'mongoose'
+import paginate from 'mongoose-paginate-v2'
 
 import { collectionsData } from '@/constants/config'
 
 import { setDefaultSettingsSchema, connectDB } from '@/shared'
 
-import { planType, role, typeRoleDependent, userStatusEnum } from './validation'
-
 import type { IUser, UserCompositeModel, UserExtraInfo } from './types'
+
+type UserDTO = Omit<IUser['userSchema'], 'comparePassword' | 'hashPassword' | 'toJSON'>
 
 export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeModel>, UserExtraInfo>(
   {
-    role: { type: String, enum: role, required: true },
-    name: { type: String, required: true },
-    status: { type: String, enum: userStatusEnum, default: 'active', required: true },
+    role: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    name: { type: String, required: true },
+    status: { type: String, required: true },
+    reasons: {
+      inactivation: { type: String },
+      activation: { type: String },
+      analysis: { type: String }
+    },
     document: {
       type: { type: String, required: true },
       value: { type: String, required: true },
       cnh: { type: String },
       rg: { type: String }
     },
+    birthDate: { type: String, required: true },
+    motherName: { type: String, required: true },
     responsible: {
       name: { type: String },
       cpf: { type: String }
     },
-    birthDate: { type: String, required: true },
-    isMinor: { type: Boolean, default: false },
-    contract: {
-      startDate: { type: String, required: true },
-      endDate: { type: String, required: true }
-    },
-    motherName: { type: String, required: true },
     phone: { type: String, required: true },
+    isMinor: { type: Boolean, default: false },
     isArchived: { type: Boolean, default: false },
-    planType: { type: String, enum: planType, required: true },
-    responsibleForSale: { type: String, required: true },
+    photo: { type: String },
     company: [
       {
         id: { type: String, required: true },
@@ -43,22 +44,41 @@ export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeMod
         cnpj: { type: String, required: true }
       }
     ],
-    resetPassword: {
-      expires: { type: Date },
-      code: { type: String },
-      attempts: { type: Number, default: 0 }
+    address: {
+      cep: { type: String, required: true },
+      city: { type: String },
+      state: { type: String },
+      neighborhood: { type: String },
+      street: { type: String },
+      number: { type: String, required: true },
+      complement: { type: String }
+    },
+    dependents: {
+      role: { type: String },
+      quantity: { type: Number },
+      dependentsList: { type: [String] }
+    },
+    contract: {
+      startDate: { type: String, required: true },
+      endDate: { type: String, required: true }
+    },
+    responsibleForSale: { type: String, required: true },
+    planType: { type: String, required: true },
+    payment: {
+      value: { type: Number, required: true },
+      method: { type: String, required: true }
     },
     attachments: {
       contract: { type: [String], required: true },
       document: { type: [String], required: true },
       paymentProof: { type: [String], required: true }
     },
-    dependents: {
-      role: { type: String, enum: typeRoleDependent },
-      quantity: { type: Number },
-      dependentsList: { type: [String] }
+    resetPassword: {
+      expires: { type: Date },
+      code: { type: String },
+      attempts: { type: Number, default: 0 }
     }
-  },
+  } satisfies RequiredShema<UserDTO>,
   {
     timestamps: true,
     collection: collectionsData.User.collection
@@ -103,7 +123,12 @@ SchemaModel.methods.toJSON = function () {
   return user
 }
 
-export const User = connectDB.model(collectionsData.User.name, SchemaModel)
+SchemaModel.plugin(paginate)
+
+export const User = connectDB.model<UserCompositeModel, PaginateModel<UserCompositeModel>>(
+  collectionsData.User.name,
+  SchemaModel
+)
 
 export * from './validation'
 export * from './types'

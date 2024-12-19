@@ -1,63 +1,87 @@
-import { Elysia, error } from 'elysia'
+import { Elysia, error, t } from 'elysia'
 
 import { jwt } from '@/middlewares/jwt'
+import { SchedulingSchema, schedulingStatusEnum } from '@/models/Scheduling'
+import { createSchedulingService } from '@/services/scheduling/create'
+import { getAllSchedulingsService } from '@/services/scheduling/get-all'
+import { updateSchedulingStatusService } from '@/services/scheduling/update-status'
 
-/* 
-rota criação de agendamento
-- nome
-- descrição
-- id user
-- data de agendamento máximo
+const router = new Elysia({ prefix: '/scheduling', tags: ['scheduling'] })
+  .use(jwt)
+  .post(
+    '/',
+    async ({ body, user }) => {
+      const scheduling = await createSchedulingService({ ...body, _id: 'das', userId: user._id })
 
-rota de listagem de agendamentos
-- listame por paginação
-- data de agendamento
-- data de naciemnto do usuario
-- dados de cpf ou cnpj do usuria
+      return {
+        message: 'Scheduling created successfully',
+        scheduling
+      }
+    },
+    {
+      body: SchedulingSchema,
+      detail: { description: 'Create a new scheduling request' }
+    }
+  )
+  .get(
+    '/',
+    async ({ query: { status, startDate, endDate, limit, offset }, user }) => {
+      if (!['admin', 'manager'].includes(user.role)) {
+        throw error('Unauthorized', 'Only admin and manager can see all schedulings')
+      }
 
-{
-  "name": "marcar consulta",
-  "description": "Marcar consulta",
-  "idUser": "5f8f4b3b9f1f3b0017f3b3b1",
-  "idDoctor": "5f8f4b3b9f1f3b0017f3b3b2",
-  "date": "2020-10-20",
-  "hour": "10:00",
-  "status": "pendente"
-}
+      const { schedulings, total } = await getAllSchedulingsService({
+        status,
+        userId: user._id,
+        startDate,
+        endDate,
+        limit,
+        offset
+      })
 
-TATUS AGENDAMENTO 
+      return {
+        message: 'Schedulings retrieved successfully',
+        schedulings,
+        total
+      }
+    },
+    {
+      query: t.Object({
+        status: t.Optional(t.String({ enum: Object.values(schedulingStatusEnum) })),
+        startDate: t.Optional(t.String({ format: 'date' })),
+        endDate: t.Optional(t.String({ format: 'date' })),
+        limit: t.Optional(t.Number({ default: 10 })),
+        offset: t.Optional(t.Number({ default: 0 }))
+      }),
+      detail: { description: 'Get all schedulings with filters' }
+    }
+  )
+  .put(
+    '/:id/status',
+    async ({ params: { id }, user, body: { status = 'analysis', ...body } }) => {
+      // Only admin and manager can update status
+      if (!['admin', 'manager'].includes(user.role)) {
+        throw new Error('Unauthorized: Only admin and manager can update scheduling status')
+      }
 
-App: Realizou a solicitação do agendamento 
-STATUS: ANÁLISE
+      const scheduling = await updateSchedulingStatusService(id, status as keyof typeof schedulingStatusEnum, {
+        value: body.value,
+        appointmentDate: body.appointmentDate
+      })
 
-Backoffice: Selecionou o agendamento recebido do app par "Marcar Consulta"
-STATUS: PENDENTE
-
-Backoffice: Entra na fila 
-STATUS: AGUARDANDO PAGAMENTO
-
-APP: Caso o usuário não comparecça na consulta ou realize o cancelamento do agendamento, o msmo ficara bloqueado durante 30 dias.
-STATUS: Bloqueado 
-
-
-Backoffice: Caso o usuário não realize o pagamento o mesmo ficara bloqueado para realizaçaõ de agendamentos
-STATUS: INADIMPLENTE
-
-- Agendamento de Consulta
-História do usuário
-Eu, sendo um consultor com acesso ao backoffice, quero visualizar as informações enviadas pelo cliente (especialidade, datas e CEP), para que eu possa contatar manualmente as clínicas mais próximas e concluir o agendamento da consulta.
-
-Critérios de aceite
- O sistema deve exibir os seguintes dados enviados pelo cliente:
-Dados pessoais: Nome completo, telefone, e-mail e endereço.
-Especialidade médica solicitada.
-Duas datas possíveis para agendamento.
-CEP informado.
-Valor 
-Gerar o Protocolo 
-Ao selecionar a opção “ Gerar Protocolo” o status do agendamento da consulta deve ser alterado para
-*/
-
-const router = new Elysia({ tags: ['scheduling'], prefix: '/scheduling' })
+      return {
+        message: 'Scheduling status updated successfully',
+        scheduling
+      }
+    },
+    {
+      body: t.Object({
+        status: t.String({ enum: schedulingStatusEnum }),
+        value: t.Optional(t.Number()),
+        appointmentDate: t.Optional(t.String({ format: 'date-time' }))
+      }),
+      detail: { description: 'Update scheduling status' }
+    }
+  )
 
 export default router

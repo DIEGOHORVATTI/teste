@@ -10,6 +10,10 @@ export const collectionsData = {
   Company: {
     name: 'Company',
     collection: 'companies'
+  },
+  Scheduling: {
+    name: 'Scheduling',
+    collection: 'schedulings'
   }
 }
 

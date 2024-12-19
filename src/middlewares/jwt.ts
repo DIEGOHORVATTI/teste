@@ -1,6 +1,6 @@
 import { Elysia, error, t } from 'elysia'
 
-import { User } from '@/models/User'
+import { IUser, User } from '@/models/User'
 
 import { jwtSettings } from '@/shared/jwt-settings'
 
@@ -18,7 +18,8 @@ export const jwt = (app: Elysia) =>
         throw error('Unauthorized', { error: 'Token inválido' })
       }
 
-      const user = (await User.findById(decoded.id))?.toJSON()
+      type UserPayloadWithId = IUser['userSchema'] & { _id: string }
+      const user = (await User.findById(decoded.id))?.toJSON() as unknown as UserPayloadWithId
       if (!user) {
         throw error('Unauthorized', { error: 'Usuário não encontrado', reLogin: true })
       }

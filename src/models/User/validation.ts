@@ -1,45 +1,46 @@
 import { t as Type } from 'elysia'
 
-const date = Type.String({ format: 'date', pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' })
+import { registrationDate } from '@/utils/validations'
+
 const namePerson = Type.String({ minLength: 3, maxLength: 100 })
 
-export const typeRoleDependent = ['titular', 'dependente'] as const
-export const planType = ['individual', 'familiar'] as const
-export const paymentMethod = ['credit', 'credit-recurring', 'pix', 'boleto', 'debit'] as const
-export const userStatusEnum = ['active', 'inactive', 'analysis'] as const
+export const UserSchema = {
+  role: Type.Enum({
+    // client: acesso as funcionalidades do sistema
+    client: 'client', // cliente
 
-export const role = {
-  client: 'client', // cliente
-
-  // backoffice
-  admin: 'admin', // admin
-  manager: 'manager', // gerente
-  salesman: 'consultant' // consultor
-} as const
-
-export const UserCredentialsSchema = {
-  email: Type.String({ format: 'email' }),
-  password: Type.String({ minLength: 6, maxLength: 20 })
-}
-
-export const UserSchema = Type.Object({
-  /**
-   * admmin: acesso total
-   * manager: acesso aos relatórios
-   * consultant: acesso aos agendamentos
-   * client: acesso as funcionalidades do sistema
-   */
-  role: Type.Enum(role),
-  ...UserCredentialsSchema,
-  name: namePerson,
-  status: Type.String({ enum: userStatusEnum, default: 'active' }),
-  document: Type.Object({
-    type: Type.String({ enum: ['cpf', 'cnpj'] }),
-    value: Type.String({ minLength: 11, maxLength: 14 }),
-    cnh: Type.Optional(Type.String({ minLength: 11, maxLength: 11 })),
-    rg: Type.Optional(Type.String({ minLength: 9, maxLength: 9 }))
+    // admmin: acesso total
+    admin: 'admin',
+    // manager: acesso aos relatórios
+    manager: 'manager',
+    // consultant: acesso aos agendamentos
+    consultant: 'consultant'
   }),
-  birthDate: date,
+  email: Type.String({ format: 'email' }),
+  password: Type.String({ minLength: 6, maxLength: 20 }),
+  name: namePerson,
+  status: Type.Enum({
+    // active: acesso as funcionalidades do sistema
+    active: 'active',
+    // inactive: acesso total
+    inactive: 'inactive',
+    // analysis: acesso aos relatórios
+    analysis: 'analysis'
+  }),
+  reasons: Type.Optional(
+    Type.Object({
+      inactivation: Type.Optional(Type.String()),
+      activation: Type.Optional(Type.String()),
+      analysis: Type.Optional(Type.String())
+    })
+  ),
+  document: Type.Object({
+    type: Type.String({ enum: ['cpf', 'cnpj'], default: 'cpf' }),
+    value: Type.String({ minLength: 11, maxLength: 14, default: '12345678901' }),
+    cnh: Type.Optional(Type.String({ minLength: 11, maxLength: 11, default: '12345678901' })),
+    rg: Type.Optional(Type.String({ minLength: 9, maxLength: 9, default: '123456789' }))
+  }),
+  birthDate: registrationDate,
   motherName: namePerson,
   responsible: Type.Optional(
     Type.Object({
@@ -71,24 +72,24 @@ export const UserSchema = Type.Object({
   }),
   dependents: Type.Optional(
     Type.Object({
-      role: Type.Optional(Type.String({ enum: typeRoleDependent })),
+      role: Type.Optional(Type.String({ enum: ['titular', 'dependente'] })),
       quantity: Type.Optional(Type.Number()),
       dependentsList: Type.Optional(Type.Array(Type.String()))
     })
   ),
   contract: Type.Object({
-    startDate: date,
-    endDate: date
+    startDate: registrationDate,
+    endDate: registrationDate
   }),
   responsibleForSale: Type.String({ minLength: 3, maxLength: 60 }),
-  planType: Type.String({ enum: planType }),
+  planType: Type.String({ enum: ['individual', 'familiar'] }),
   payment: Type.Object({
     value: Type.Number(),
-    method: Type.String({ enum: paymentMethod })
+    method: Type.String({ enum: ['credit', 'credit-recurring', 'pix', 'boleto', 'debit'] })
   }),
   attachments: Type.Object({
     contract: Type.Array(Type.String({ format: 'url' })),
     document: Type.Array(Type.String({ format: 'url' })),
     paymentProof: Type.Array(Type.String({ format: 'url' }))
   })
-})
+}

@@ -1,6 +1,6 @@
 import { Elysia, t, t as Type } from 'elysia'
 
-import { UserCredentialsSchema } from '@/models/User'
+import { UserSchema } from '@/models/User'
 
 import { signService } from '@/services/auth/sign'
 import { recoverPasswordService } from '@/services/auth/recover-password'
@@ -24,7 +24,13 @@ const router = new Elysia({ tags: ['auth'], prefix: '/auth' })
 
       return { message: 'Login realizado com sucesso' }
     },
-    { detail: 'Realiza o login', body: Type.Object(UserCredentialsSchema) }
+    {
+      detail: 'Realiza o login',
+      body: Type.Object({
+        email: UserSchema.email,
+        password: UserSchema.password
+      })
+    }
   )
   .post(
     '/recover-password',
@@ -35,7 +41,7 @@ const router = new Elysia({ tags: ['auth'], prefix: '/auth' })
     },
     {
       detail: { description: 'Envia um e-mail para recuperação de senha' },
-      body: Type.Object({ email: UserCredentialsSchema.email })
+      body: Type.Object({ email: UserSchema.email })
     }
   )
   .use(jwt)

@@ -1,3 +1,5 @@
+import { t as Type } from 'elysia'
+
 import { HydratedDocumentFromSchema } from 'mongoose'
 
 import { UserSchema } from './validation'
@@ -15,9 +17,10 @@ export type UserExtraInfo = {
   }
 }
 
+const userModel = Type.Object(UserSchema).static
 export type IUser = {
   userDocument: HydratedDocumentFromSchema<typeof SchemaModel>
-  userSchema: typeof UserSchema.static & Partial<UserExtraInfo>
+  userSchema: typeof userModel & Partial<UserExtraInfo>
 }
 
 export type UserCompositeModel = IUser['userSchema'] & UserExtraInfo

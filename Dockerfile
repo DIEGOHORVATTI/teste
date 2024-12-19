@@ -1,25 +1,29 @@
-# Use the official Bun image to build the app
-FROM oven/bun:latest
+# Use a imagem Node LTS slim como base
+FROM node:lts-slim
 
-# Set the working directory inside the container
+# Instale dependências necessárias para instalar o Bun
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+
+# Instale o Bun
+RUN curl -fsSL https://bun.sh/install | bash
+
+# Adicione o Bun ao PATH
+ENV PATH="/root/.bun/bin:$PATH"
+
+# Configure o diretório de trabalho
 WORKDIR /app
 
-# Instalar curl apenas no Linux, não no macOS
-RUN if [ "$(uname -s)" = "Linux" ]; then \
-        apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*; \
-    fi
-
-# Copy package.json and bun.lockb files first (for caching dependencies)
+# Copie package.json e bun.lockb primeiro para cache de dependências
 COPY package.json bun.lockb ./
 
-# Install the dependencies
+# Instale as dependências com o Bun
 RUN bun install
 
-# Copy the rest of your app's code
+# Copie o restante do código
 COPY . .
 
-# Expose the port your app will run on
+# Exponha a porta da aplicação
 EXPOSE 3000
 
-# Run the application
+# Execute o aplicativo
 CMD ["bun", "run", "start"]

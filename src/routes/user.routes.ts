@@ -1,22 +1,10 @@
 import { Elysia, error, t as Type } from 'elysia'
 
 import { getOneUserUseCase, createUserService, updateUserService, deleteUserService } from '@/services/users'
-import { getAllUsersService } from '@/services/users/get-all'
+import { getAllUsersService, userFilter } from '@/services/users/get-all'
 
-import { UserSchema, userStatusEnum } from '@/models/User'
+import { UserSchema } from '@/models/User'
 import { jwt } from '@/middlewares/jwt'
-
-export const userFilter = Type.Object({
-  limit: Type.Optional(Type.Number({ default: 10 })),
-  offset: Type.Optional(Type.Number({ default: 0 })),
-  filters: Type.Optional(
-    Type.Object({
-      status: Type.Optional(Type.String({ enum: userStatusEnum, default: 'active' })),
-      startDate: Type.Optional(Type.String({ format: 'date' })),
-      endDate: Type.Optional(Type.String({ format: 'date' }))
-    })
-  )
-})
 
 const router = new Elysia({ tags: ['users'], prefix: '/users' })
   .post(
@@ -27,27 +15,11 @@ const router = new Elysia({ tags: ['users'], prefix: '/users' })
       return { message: 'Usuário criado com sucesso', user }
     },
     {
-      body: UserSchema,
+      body: Type.Object(UserSchema),
       detail: { description: 'Cria um usuário' }
     }
   )
   .use(jwt)
-  .get(
-    '/',
-    async ({ user, query: { limit, offset, filters } }) => {
-      if (!(user.role === 'admin')) {
-        throw error('Unauthorized', 'Você não tem permissão para acessar essa rota')
-      }
-
-      const { users } = await getAllUsersService({ limit, offset, filters })
-
-      return { message: 'Usuários encontrados com sucesso', users }
-    },
-    {
-      query: userFilter,
-      detail: { description: 'Retorna todos os usuários' }
-    }
-  )
   .get(
     '/:id',
     async ({ params: { id } }) => {
@@ -67,7 +39,7 @@ const router = new Elysia({ tags: ['users'], prefix: '/users' })
       return { message: 'Usuário atualizado com sucesso', user }
     },
     {
-      body: UserSchema,
+      body: Type.Object(UserSchema),
       detail: { description: 'Atualiza um usuário' }
     }
   )
@@ -85,12 +57,21 @@ const router = new Elysia({ tags: ['users'], prefix: '/users' })
       detail: { description: 'Deleta um usuário' }
     }
   )
+  .post(
+    '/filters',
+    async ({ user, body: { limit, page, filters } }) => {
+      if (!(user.role === 'admin')) {
+        throw error('Unauthorized', { error: 'Você não tem permissão para acessar essa rota' })
+      }
+
+      const allUsers = await getAllUsersService({ limit, page, filters })
+
+      return { message: 'Usuários encontrados com sucesso', ...allUsers }
+    },
+    {
+      body: userFilter,
+      detail: { description: 'Retorna todos os usuários' }
+    }
+  )
 
 export default router
-
-/* 
-listagem de usuarioas com entrada de documento value
-listagem em limit and offset com entrada de query value
-filtros de status, data startar date e end date
-status do usuario - > ativo inativo
-*/

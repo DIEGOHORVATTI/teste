@@ -1,20 +1,24 @@
 {
   "name": "backend",
   "type": "module",
-  "version": "0.1.10",
+  "version": "0.1.18",
   "dependencies": {
     "@elysiajs/jwt": "^1.1.1",
     "@elysiajs/swagger": "^1.1.6",
     "@react-email/components": "^0.0.31",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.7.9",
     "elysia": "^1.1.26",
     "elysia-rate-limit": "^4.1.0",
-    "mongoose": "^8.9.0",
+    "mongoose": "8.9.0",
+    "mongoose-paginate-v2": "^1.8.5",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@types/multer": "^1.4.12",
     "@types/bun": "^1.1.14",
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.0.1",
