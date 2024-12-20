@@ -6,10 +6,14 @@ import nodemailer from 'nodemailer'
 import { User } from '@/models/User'
 import RecoverPasswordEmail from '@/emails/RecoverPasswordEmail'
 
-import { MAIL_HOST, MAIL_PASSWORD, MAIL_PORT, MAIL_USERNAME } from '@/constants/config'
-
-const CODE_EXPIRATION_TIME = 10 * 60 * 1000 // 10 minutos em milissegundos
-const MAX_ATTEMPTS = 3
+import {
+  CODE_EXPIRATION_TIME,
+  MAX_ATTEMPTS,
+  MAIL_HOST,
+  MAIL_PASSWORD,
+  MAIL_PORT,
+  MAIL_USERNAME
+} from '@/constants/config'
 
 export const recoverPasswordService = async (email: string) => {
   const user = await User.findOne({ email })

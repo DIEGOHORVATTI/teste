@@ -5,28 +5,31 @@ import { registrationDate } from '@/utils/validations'
 const namePerson = Type.String({ minLength: 3, maxLength: 100 })
 
 export const UserSchema = {
-  role: Type.Enum({
-    // client: acesso as funcionalidades do sistema
-    client: 'client', // cliente
-
-    // admmin: acesso total
-    admin: 'admin',
-    // manager: acesso aos relatórios
-    manager: 'manager',
-    // consultant: acesso aos agendamentos
-    consultant: 'consultant'
-  }),
+  role: Type.Enum(
+    {
+      client: 'client', // cliente
+      admin: 'admin', // administrador
+      manager: 'manager', // gestor
+      consultant: 'consultant' // consultor
+    },
+    { default: 'client' }
+  ),
   email: Type.String({ format: 'email' }),
   password: Type.String({ minLength: 6, maxLength: 20 }),
   name: namePerson,
-  status: Type.Enum({
-    // active: acesso as funcionalidades do sistema
-    active: 'active',
-    // inactive: acesso total
-    inactive: 'inactive',
-    // analysis: acesso aos relatórios
-    analysis: 'analysis'
-  }),
+  status: Type.Enum(
+    {
+      // active: acesso as funcionalidades do sistema
+      active: 'active',
+      // inactive: acesso total
+      inactive: 'inactive',
+      // analysis: acesso aos relatórios
+      analysis: 'analysis'
+    },
+    {
+      default: 'active'
+    }
+  ),
   reasons: Type.Optional(
     Type.Object({
       inactivation: Type.Optional(Type.String()),
@@ -73,6 +76,7 @@ export const UserSchema = {
   dependents: Type.Optional(
     Type.Object({
       role: Type.Optional(Type.String({ enum: ['titular', 'dependente'] })),
+      document: Type.Optional(Type.String({ minLength: 11, maxLength: 14 })),
       quantity: Type.Optional(Type.Number()),
       dependentsList: Type.Optional(Type.Array(Type.String()))
     })
@@ -88,8 +92,8 @@ export const UserSchema = {
     method: Type.String({ enum: ['credit', 'credit-recurring', 'pix', 'boleto', 'debit'] })
   }),
   attachments: Type.Object({
-    contract: Type.Array(Type.String({ format: 'url' })),
-    document: Type.Array(Type.String({ format: 'url' })),
-    paymentProof: Type.Array(Type.String({ format: 'url' }))
+    contract: Type.Array(Type.Object({ url: Type.String({ format: 'url' }), name: Type.String() })),
+    document: Type.Array(Type.Object({ url: Type.String({ format: 'url' }), name: Type.String() })),
+    paymentProof: Type.Array(Type.Object({ url: Type.String({ format: 'url' }), name: Type.String() }))
   })
 }

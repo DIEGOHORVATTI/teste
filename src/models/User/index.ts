@@ -55,6 +55,7 @@ export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeMod
     },
     dependents: {
       role: { type: String },
+      document: { type: String },
       quantity: { type: Number },
       dependentsList: { type: [String] }
     },
@@ -69,9 +70,24 @@ export const SchemaModel = new Schema<UserCompositeModel, Model<UserCompositeMod
       method: { type: String, required: true }
     },
     attachments: {
-      contract: { type: [String], required: true },
-      document: { type: [String], required: true },
-      paymentProof: { type: [String], required: true }
+      contract: [
+        {
+          url: { type: String },
+          name: { type: String }
+        }
+      ],
+      document: [
+        {
+          url: { type: String },
+          name: { type: String }
+        }
+      ],
+      paymentProof: [
+        {
+          url: { type: String },
+          name: { type: String }
+        }
+      ]
     },
     resetPassword: {
       expires: { type: Date },

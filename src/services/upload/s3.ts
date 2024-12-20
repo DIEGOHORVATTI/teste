@@ -4,7 +4,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 
 import { AWS_ACCESS_KEY, AWS_REGION, AWS_SECRET_KEY, S3_BUCKET } from '@/constants/config'
 
-const s3 = new S3Client({
+export const s3 = new S3Client({
   credentials: {
     accessKeyId: AWS_ACCESS_KEY,
     secretAccessKey: AWS_SECRET_KEY

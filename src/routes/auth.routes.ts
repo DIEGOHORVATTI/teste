@@ -4,6 +4,7 @@ import { UserSchema } from '@/models/User'
 
 import { signService } from '@/services/auth/sign'
 import { recoverPasswordService } from '@/services/auth/recover-password'
+import { verifyCodeService } from '@/services/auth/verify-code'
 
 import { jwt } from '@/middlewares/jwt'
 import { jwtSettings } from '@/shared/jwt-settings'
@@ -42,6 +43,27 @@ const router = new Elysia({ tags: ['auth'], prefix: '/auth' })
     {
       detail: { description: 'Envia um e-mail para recuperação de senha' },
       body: Type.Object({ email: UserSchema.email })
+    }
+  )
+  .post(
+    '/verify-code',
+    async ({ body: { email, code } }) => {
+      const isValid = await verifyCodeService(email, code)
+
+      if (!isValid) {
+        return { message: 'Código inválido', status: 400 }
+      }
+
+      return { message: 'Código verificado com sucesso' }
+    },
+    {
+      detail: {
+        description: 'Verifica o código enviado por e-mail para recuperação de senha'
+      },
+      body: Type.Object({
+        email: UserSchema.email,
+        code: t.String({ description: 'Código enviado por e-mail' })
+      })
     }
   )
   .use(jwt)

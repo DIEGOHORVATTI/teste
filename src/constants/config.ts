@@ -38,20 +38,24 @@ export const endpoints = {
   }
 }
 
+// Environment variables
+export const NODE_ENV = process.env.NODE_ENV
+export const PORT = process.env.PORT || 3000
 export { version } from '../../package.json'
 
-export const HOST_API = process.env.HOST_API || ''
-
+// Database configuration
 export const MONGODB_DATABASE = process.env.MONGODB_DATABASE || ''
 export const MONGO_URL = process.env.MONGO_URI || ''
 
-export const PORT = process.env.PORT || 3000
-
+// JWT configuration
 export const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 export const JWT_EXP = process.env.JWT_EXP || '7d'
 
-export const NODE_ENV = process.env.NODE_ENV
+// Password recovery configuration
+export const CODE_EXPIRATION_TIME = 10 * 60 * 1000 // 10 minutos em milissegundos
+export const MAX_ATTEMPTS = 3
 
+// Mail configuration
 export const MAIL_HOST = process.env.MAIL_HOST || ''
 export const MAIL_PORT = process.env.MAIL_PORT || 0
 export const MAIL_USERNAME = process.env.MAIL_USERNAME || ''

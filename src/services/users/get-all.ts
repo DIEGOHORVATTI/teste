@@ -17,19 +17,10 @@ export const getAllUsersService = async ({ limit = 10, page = 0, filters = {} }:
     throw error('Not Found', { error: 'Nenhum usuário encontrado com os filtros fornecidos' })
   }
 
-  const aggregatedStatus = users.reduce(
-    (acc, { status }) => {
-      acc[status] = acc[status] + 1
-
-      return acc
-    },
-    { active: 0, inactive: 0, analysis: 0 }
-  )
-
-  return { users, pagination, aggregatedStatus }
+  return { users, pagination }
 }
 
-export const userFilter = Type.Object({
+export const userFilterCriteria = {
   limit: Type.Optional(
     Type.Number({
       default: 10,
@@ -47,10 +38,10 @@ export const userFilter = Type.Object({
   ),
   filters: Type.Optional(
     Type.Object({
-      status: Type.Optional(Type.String({ enum: ['active', 'inactive', 'analysis'], default: 'active' })),
-      document: Type.Optional(UserSchema.document),
-      startDate: Type.Optional({ ...registrationDate, default: '2021-01-01' }),
-      endDate: Type.Optional({ ...registrationDate, default: '2024-12-31' })
+      startDate: Type.Optional(registrationDate),
+      endDate: Type.Optional(registrationDate),
+      ...Object.fromEntries(Object.entries(UserSchema).map(([key, value]) => [key, Type.Optional(value)]))
     })
   )
-})
+}
+export const userFilter = Type.Object(userFilterCriteria)
