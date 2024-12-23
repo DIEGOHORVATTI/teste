@@ -1,8 +1,15 @@
 import { error } from 'elysia'
-import { User } from '@/models/User'
-import { MAX_ATTEMPTS } from '../../constants/config'
 
-export const verifyCodeService = async (email: string, code: string) => {
+import { IUser, User } from '@/models/User'
+
+import { MAX_ATTEMPTS } from '@/constants/config'
+
+type Props = {
+  email: string
+  code: string
+}
+
+export const verifyCodeService = async ({ email, code }: Props) => {
   const user = await User.findOne({ email })
 
   if (!user) {
@@ -10,6 +17,8 @@ export const verifyCodeService = async (email: string, code: string) => {
   }
 
   const { resetPassword } = user
+
+  console.log(resetPassword)
 
   if (!resetPassword || !resetPassword.code) {
     throw error('Bad Request', { error: 'Nenhum código de recuperação foi gerado' })
@@ -24,23 +33,10 @@ export const verifyCodeService = async (email: string, code: string) => {
   }
 
   if (resetPassword.code !== code) {
-    resetPassword.attempts += 1
-
-    await user.save().catch<{ message: string }>(err => {
-      throw error('Internal Server Error', {
-        error: 'Erro ao salvar informações do usuário',
-        details: err.message
-      })
-    })
+    await incrementResetAttempts(user)
 
     throw error('Unauthorized', { error: 'Código inválido' })
   }
-
-  Object.assign(user.resetPassword, {
-    code: null,
-    expires: null,
-    attempts: 0
-  })
 
   await user.save().catch<{ message: string }>(err => {
     throw error('Internal Server Error', {
@@ -50,4 +46,15 @@ export const verifyCodeService = async (email: string, code: string) => {
   })
 
   return { message: 'Código verificado com sucesso' }
+
+  async function incrementResetAttempts(user: IUser['userDocument']) {
+    resetPassword.attempts += 1
+
+    await user.save().catch<{ message: string }>(err => {
+      throw error('Internal Server Error', {
+        error: 'Erro ao salvar informações do usuário',
+        details: err.message
+      })
+    })
+  }
 }

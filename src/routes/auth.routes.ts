@@ -5,6 +5,7 @@ import { UserSchema } from '@/models/User'
 import { signService } from '@/services/auth/sign'
 import { recoverPasswordService } from '@/services/auth/recover-password'
 import { verifyCodeService } from '@/services/auth/verify-code'
+import { resetPasswordService } from '@/services/auth/reset-password'
 
 import { jwt } from '@/middlewares/jwt'
 import { jwtSettings } from '@/shared/jwt-settings'
@@ -48,11 +49,7 @@ const router = new Elysia({ tags: ['auth'], prefix: '/auth' })
   .post(
     '/verify-code',
     async ({ body: { email, code } }) => {
-      const isValid = await verifyCodeService(email, code)
-
-      if (!isValid) {
-        return { message: 'Código inválido', status: 400 }
-      }
+      await verifyCodeService({ email, code })
 
       return { message: 'Código verificado com sucesso' }
     },
@@ -66,13 +63,26 @@ const router = new Elysia({ tags: ['auth'], prefix: '/auth' })
       })
     }
   )
-  .use(jwt)
-  .get(
-    '/me',
-    async ({ user }) => user,
+  .post(
+    '/reset-password',
+    async ({ body: { email, code, newPassword } }) => {
+      await resetPasswordService({ email, newPassword, code })
 
-    { detail: { description: 'Retorna os dados do usuário logado' } }
+      return { message: 'Senha redefinida com sucesso' }
+    },
+    {
+      body: Type.Object({
+        email: UserSchema.email,
+        newPassword: UserSchema.password,
+        code: t.String({ description: 'Código de verificação' })
+      }),
+      detail: {
+        description: 'Redefine a senha do usuário após verificação do código'
+      }
+    }
   )
+  .use(jwt)
+  .get('/me', async ({ user }) => user, { detail: { description: 'Retorna os dados do usuário logado' } })
   .get(
     '/logout',
     async ({ token }) => {
